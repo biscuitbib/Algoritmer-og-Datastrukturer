@@ -1,10 +1,9 @@
 *.aux
 *.log
-*/auto/
 *.out
 *.toc
 *.pdf
 *.el
 auto/
-auto/*
-/auto/
+*/auto/
+*auto*
