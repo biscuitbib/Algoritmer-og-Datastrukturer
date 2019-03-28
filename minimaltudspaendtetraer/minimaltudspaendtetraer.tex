@@ -1,0 +1,73 @@
+\section{Minimalt Udspændte Træer}
+\hrulefill
+
+\begin{itemize}
+\item Udspændte træer
+\item Kruskals algoritme
+  \begin{itemize}
+  \item Disjunkte mængder
+  \item Køretid af Kruskals algoritme
+  \end{itemize}
+\item Prim's algoritme
+  \begin{itemize}
+    \item Prioritetskø
+  \end{itemize}
+\end{itemize}
+
+
+\newpage
+\subsection{Udspændte træer}
+givet en graf $G = (V, E)$, så er $T \subset G.E$ et udspændt træ, således at $w(T) = \sum_{e \in T}w(e)$, hvor $w(u,v)$ er en vægt-funktion der bestemmer vægten af en kant der går mellem knuderne $u,v$. Et minimalt udspændt træ er, som navnet hentyder, et udspændt træ for $G$ med den laveste samlede vægt.\\
+
+Vi bruger en grådig algoritme til at bygge et MST, hvor det grådige valg er at tilføje en kant $e \in G.E$ og tilføje den til en mængde $A$. For at tilføje kanter til $A$ holder vi øje med følgende invariant:
+\begin{center}
+Før vi tilføjer en ny knude, udgør $A$ en delmængde af et MST.
+\end{center}
+
+Selve algoritmen går ud på at finde en \textbf{safe edge}, som er en kant $e$ der overholder invarianten og så tilføje den til $A$, og dette gør man iterativt, indtil $A$ udgør et udspændt træ for $G$.\\
+\begin{itemize}
+\item \textbf{Initiering}: Den tomme mængde er en delmængde af et MST.\\
+\item \textbf{Vedligeholdelse}: Vi tilføjer kun safe-edges, og overholder derfor invarianten.\\
+\item \textbf{Afslutning}: Siden alle kanterne vi har tilføjet har overholdt invarianten, må alle kanter i $A$ være i et MST, derfor må $A$ være et MST.
+\end{itemize}
+
+For at finde en safe-edge skal vi finde en \textbf{light-edge}, som er en minimumsvægtet kant der forbinder et \textbf{cut} af $G$. Et cut er en opdeling af $G.V$, således at $G$ bliver splittet i to nye disjunkte grafer indeholdende knuderne $S$ og $V-S$.
+\begin{theorem}
+  Lad $G=(V,E)$ være en forbundet graf med en vægtsfunktion $w(u,v)$ i $G.E$. Lad $A$ være en delmængde af $G.E$, som er inkluderet i et MST for $G$.\\
+  Lad $(S, V-S)$ være et cut af $G$ der respekterer $A$, og lad $(u,v)$ være en light-edge som forbinder det cut, så vil $(u,v)$ være en safe-edge for $A$.
+\end{theorem}
+
+
+\begin{proof}
+  Vi beviser det med modstrid. Lad $T$ være et MST der indeholder $A$, og som ikke indeholder en light-edge $(u,v)$. Vi bygger nu et nyt MST $T'$, som indeholder $A \cup {(u,v)}$, og derved vise at $(u,v)$ er en safe-edge.\\
+
+  $(u, v)$ forbinder cuttet $(S,V-S)$, og siden $G$ er forbundet, må der være en kant $(x,y)$ fra $u \leadsto v$ der også forbinder cuttet $(S,V-S)$. $(x,y)$ er ikke i $A$. Vi laver nu et nyt træ, vi bruger $(u,v)$ til at forbinde cuttet i stedet for $(x,y)$:
+  $$T' = T - \{(x,y)\} \cup \{(u,v)\}$$
+  
+  Siden $(u,v)$ er en light-edge for cuttet, så må $w(u,v) \leq w(x,y)$, hvilket betyder
+  \begin{align*}
+    w(T') &= w(T) - w(x,y) + w(u,v)\\
+          &\leq w(T)
+  \end{align*}
+
+  Derfor må $T'$ også være et MST for $G$. Det sidste vi mangler at vise er, at $(u,v)$ er en safe-edge for $A$, hvilket kan ses ved at $A \cup \{(u,v)\} \subset T'$.
+\end{proof}
+
+\subsection{Kruskals algoritme}
+Den første algoritme til at finde MST er Kruskals algoritme. Denne algoritme bruger en \textbf{skov} af træer, som er alle knuderne $G.V$. Derefter forbinder den de knuder som udgør en safe-edge.
+
+\subsubsection{Disjunkte mængder}
+For at forstå Kruskals algoritme, skal vi forstå disjunkte mængder.\\
+Linked-list repræsentation
+Operationer: Make-Set, Union, Find-Set
+Weighted-union heuristik: Bevis Theorem 21.1
+Disjoint-set skove: Union-by-rank, path compression
+
+\subsubsection{Køretid af Kruskals algoritme}
+Vi bruger \textbf{disjoint-set forets} til at udvikle MST med Kruskals.\\
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "master"
+%%% End:

@@ -1,0 +1,51 @@
+\section{Fibonacci Hobe}
+\hrulefill
+\begin{itemize}
+  \item Operationer på en Fibonacci hob
+  \item Potentiale funktionen
+  \item Mergeable hob
+  \item Knude operationer
+\end{itemize}
+
+\newpage
+\subsection{Operationer på en Fibonacci hob}
+Fibonacci hobe er en \textbf{mergeable heap} datastruktur, hvilket vil sige, at den består af en disjunkt mængde af hobe der understøtter nogle bestemte operationer til at skabe og flette hobe.\\
+
+\begin{tabular}{lcc}
+Operation & Binært træ (worst-case) & Fibonacci hob (amotiseret)\\
+\hline
+     \texttt{MAKE-HEAP} & $\Theta(1)$ & $\Theta(1)$ \\
+     \texttt{INSERT} & $\Theta(lgn)$ & $\Theta(1)$ \\
+     \texttt{MINIMUM} & $\Theta(1)$ & $\Theta(1)$ \\
+     \texttt{EXTRACT-MIN} & $\Theta(lgn)$ & $Ø(lgn)$ \\
+     \texttt{UNION} & $\Theta(n)$ & $\Theta(1)$ \\
+     \texttt{DECREASE-KEY} & $\Theta(lgn)$ & $\Theta(1)$ \\
+     \texttt{DELETE} & $\Theta(1)$ & $\Theta(1)$ \\
+\end{tabular}
+
+\quad\\
+
+Fibonacci hoben består af en cirkulær \textbf{doubly linked-list}, kaldet rod-listen, som består af rødderne til nogle min-hobe. Hver rod, har en peger til den næste rod, og selve Fibonacci hoben er en peger til den mindste af rødderne, så man altid kan hive det mindste element ud af Fibonacci hoben. Hver knude i en hob kan have adskillige børn, og børnene er også forbundet af en cirkulær doubly linked-list, så hvert barn har en peger til sin forrige og næste søskende.\\
+
+Hver knude $x$ har følgende felter
+\begin{itemize}
+    \item $x.left, x.right$ venstre og højre pegere i den liste knuden befinder sig i. Enten rod-listen eller en børne-liste
+    \item $x.child$ er en peger til et vilkårligt barn i sin børne-liste
+    \item $x.parent$ er en peger til sin forælder. Hvis denne peger er \texttt{NIL} er knuden en rod
+    \item $x.degree$ er antallet af børn
+    \item $x.mark$ er en boolsk værdi
+\end{itemize}
+
+Selve Fibonacci hoben $H$ har kun to felter; $H.min$ er pegeren til den mindste knude i rod-listen. $H.n$ er antallet af knuder i Fibonacci hoben.
+
+\subsection{Potentiale funktionen}
+Når vi skal udregne den amortiserede pris for de forskellige operationer, bruger vi en potential funktion
+$$\Phi(H) = t(H) + 2m(H)$$
+
+Hvor $t(H)$ er antallet af rødder i rod-listen, og $m(H)$ er antallet af markerede knuder i Fibonacci hoben. Vi antager at vi starter med en tom Fibonacci hob, og $\Phi(H)$ starter med at være 0, og bliver aldrig negativ.\\
+Vi har også, at en knudes maksimale degree, i et træ med $n$ knuder, er $D(n) = Ø(lgn)$.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "master"
+%%% End:

@@ -1,0 +1,46 @@
+\documentclass[a4paper]{article}
+
+\usepackage{epsfig}
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[danish]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[all]{hypcap}
+\usepackage{float}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary {positioning}
+\usepackage{amsthm}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+
+\setlength\parindent{0pt}
+\def\dunderline#1{\underline{\underline{#1}}}
+\renewcommand{\O}{\mathcal{O}}
+\renewcommand\qedsymbol{$\blacksquare$}
+
+\title{\textbf{Algoritmer og Datastrukturer}}
+\author{Niklas Magnussen - blg515}
+
+
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\include{deloghersk/deloghersk}
+\include{fibonaccihobe/fibonaccihobe}
+\include{binaersoegetrae/binaersoegetrae}
+\include{dynamiskprogrammering/dynamiskprogrammering}
+\include{graadigealgoritmer/graadigealgoritmer}
+\include{minimaltudspaendtetraer/minimaltudspaendtetraer}
+\include{kortestevej/kortestevej}
+\include{amortiseretanalyse/amortiseretanalyse}
+\end{document}

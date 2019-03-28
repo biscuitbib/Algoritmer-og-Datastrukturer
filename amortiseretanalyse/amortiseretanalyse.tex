@@ -1,0 +1,196 @@
+
+\section{Amortiseret Analyse}
+\hrulefill
+\begin{itemize}
+\item Analysere en binær tæller
+\begin{itemize}
+    \item Aggregate analysis
+    \item Accounting method
+\end{itemize}
+\item Potential method - Dynamisk tabel
+  \begin{itemize}
+  \item Indsæt element
+  \item Fjern element
+  \end{itemize}
+\end{itemize}
+
+\newpage
+\subsection{Analysere en binær tæller}
+Amortiseret analyse går ud på at tage gennemsnittet af en række operationers worst-case køretid. Det eksempel vi bruger til at beskrive de forskellige metoder til amortiseret analyse, er en binær tæller.\\
+
+\begin{algorithm}[H]
+  \caption{Inkrementere en binær tæller}
+  \begin{algorithmic}[1]
+  \State $A[0...k-1]$ array af bits som vi inkrementerer.
+  \Function{INCREMENT}{$A$}
+  \State $i = 0$
+  \While{$i < k$ \textbf{and} $A[i]==1$}
+  \State $A[i] = 0$
+  \State $i = i + 1$
+  \EndWhile
+  \If{$i < k$}
+  \State $A[i] = 1$
+  \EndIf
+  \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+Funktionen kører over arrayet indtil den finder et sted at hvor den kan flippe en bit til 1. Det er let at se at vi looper over hele arrayet i worst-case, hvilket gør køretiden af \texttt{INCREMENT} $Ø(k)$. Hvis vi så ønsker at inkrementerer et array $n$ gange, får vi en køretid på alle operationer af $Ø(nk)$.
+
+\subsubsection{Aggregate analysis}
+Problemet med binær tællerens $Ø(nk)$ køretid er, at vi næsten aldrig skal loope over hele arrayet. Vi kigger først på den amortiserede køretid med aggregate analysis.\\
+Den $i$'te bit bliver flippet hver $2^i$'te gang, og $\lfloor \frac{n}{2^i}\rfloor$ gange i alt. Det totale antal bits der bliver flippet er derfor 
+$$\sum_{i=0}^{k-1} \lfloor \frac{n}{2^i}\rfloor = Ø(n)$$
+
+For at få den amortiserede køretid af hver \texttt{INCREMENT} tager vi gennemsnittet af alle bit flips.
+$$\frac{Ø(n)}{n} = Ø(1)$$
+
+\subsubsection{Accounting method}
+Accounting metoden tildeler vi operationer en ny pris, deres amortiserede pris. Nogle operationers amortiserede pris kan være dyrere end deres rigtige pris, og nogle har en billigere pris. Hvis en operations amortiserede pris er højere end den rigtige pris, gemmes det overskydende som kredit, og hvis en operations amortiserede pris er lavere, må den låne kredit gemt på datastrukturen til at betale for den.Den amortiserede pris skal være sådan, at der ikke kan være negativ kredit gemt, og hvis det gælder, så er den totale køretid derfor summen af alle operationernes amortiserede pris.\\
+
+I vores eksempel med binær tælleren, giver vi den operation der flipper en bit til 1 en pris på 2, og det at flippe en bit til 0 en pris på 0. Intuitionen er, at en bit kan ikke flippes til 0 før den har været flippet til 1, derfor betaler den operation der flipper den til 1 både for sig selv og for operationen der flipper tilbage til 0. Når vi udfører en \texttt{increment} flipper vi kun 1 bit til 1, og derfor koster selve \texttt{INCREMENT} 2, og derfor er antallet af kredit gemt lig med antallet af 1'ere i arrayet. Den totale køretid er summen af alle operationers pris $2n = Ø(n)$, og selve increment er $2 = Ø(1)$.
+
+\subsection{Potential method - Dynamisk tabel}
+I potential metoden, bruger vi en funktion $\Phi(D_i)$, som er en funktion af vores datastruktur efter $i$ operationer, og som vi kalder potentialet. Vi udregner så den amortiserede pris af den  $i$'te operation, som den rigtige pris af operationen plus ændring i potentialet efter operationen.
+$$\hat{c_i} = c_i + \Phi(D_i) - \Phi(D_{i - 1})$$
+
+Ligesom accounting metoden, så kan potentialet efter en operation bruges til at betale for andre operationer senere hen, så derfor, så længe potentialet ikke er negativt, så er summen af de amortiserede køretider en øvre grænse for operationernes køretider.\\
+
+Vi bruger et andet eksempel end en binær tæller -- Vi kigger på en dynamisk tabel, hvor vi fordobler længden når det er fyldt, og halverer når det er for kort. Vi definerer \textbf{load-factor} $\alpha (T)$ til at være antallet af elementer divideret med antallet af pladser i tabellen.\\
+Vi antager at vores dynamiske tabel understøtter følgende operationer, hvis amortiserede køretider vi vil kigge på:
+\begin{itemize}
+\item \texttt{TABLE-INSERT} lægger et element ind i vores tabel. Vi fordobler når tabel er fyldt, altså når load-factoren $\alpha(T) = 1$
+\item \texttt{TABLE-DELETE} fjerner et element fra vores tabel. Vi halverer når der er en fjerdedel ledige pladser, altså når load-factoren $\alpha(T) = 1/4$
+\end{itemize}
+
+Vores dynamiske tabel fungerer således, at hvis tabellen bliver fyldt efter en \texttt{TABLE-INSERT}, altså den har en load-factor på 1, så allokerer vi en ny tabel af dobbelt størrelse. Umiddelbart har \texttt{TABLE-INSERT} en worst-case køretid på $Ø(n)$ siden den skal kopiere $n$ elementer fra den gamle tabel til den nye, men vi kan vise at den har en amortiseret køretid på $Ø(1)$, da den ikke skal udvide tabelen særligt ofte.\\
+
+Vi definere en potential funktion på tabellen efter $i$ operationer
+\begin{equation*}
+  \Phi(T_i) =
+  \begin{cases}
+    2 \cdot T_i.num - T_i.size & \text{ hvis } \alpha(T_i) \geq 1/2\\
+    T_i.size/2 - T_i.num_i & \text{ hvis } \alpha(T_i) < 1/2
+  \end{cases}
+\end{equation*}
+
+Vi lægger mærke til nogle egenskaber af vores potentiale funktion.\\
+Hvis $\alpha(T) = 1$, så er $T.num = T.size$, og $\Phi(T) = 2T.num - T.num = T.num$, hvilket betyder at vi har nok potentiale til at rykke alle elementer ind i den større tabel.\\
+Ligeledes, når vi skal halverer, så er $\alpha(T)=1/4$, og $\Phi(T) = 2T.num - T.num = T-num$ og vi har igen nok potentiale til at rykke alle elementer ind i den mindre tabel. Hvis $\alpha(T)=1/2$, så er potentialet 0, og vi kan frit indsætte og fjerne, uden at skulle bekymre om tabelstørrelsen.\\
+
+Nu ser vi på $n$ \texttt{TABLE-INSERT} og \texttt{TABLE-DELETE} operationer på vores dynamiske tabel. Der er 6 tilfælde vi kigger på.\\
+\begin{center}
+\begin{tabular}{cc|cc}
+  \texttt{TABLE-INSERT} &  & \texttt{TABLE-DELETE} & \\
+  \hline
+  $\alpha(T_{i-1}) \geq 1/2 \Rightarrow$ & $\alpha(T_i) \geq 1/2$ &  $\alpha(T_{i-1}) < 1/2 \Rightarrow$ & $\alpha(T_i) < 1/2$\\
+  \\
+  $\alpha(T_{i-1}) < 1/2 \Rightarrow$ & $\alpha(T_i) < 1/2$ & $\alpha(T_{i-1}) \geq 1/2 \Rightarrow$ & $\alpha(T_i) \geq 1/2$\\
+  & $\alpha(T_i) \geq 1/2$ & & $\alpha(T_i) < 1/2$
+\end{tabular}
+\end{center}
+
+\subsubsection{Indsæt element}
+Vi starter med at kigge på den amortiserede køretid i tilfælde af \texttt{TABLE-INSERT}.\\
+Vi ser på når  $\alpha(T_{i-1}) \geq 1/2$, på de to tilfælde, hvor vi enten fordobler, eller ikke fordobler.\\
+
+Hvis en indsættelse \underline{ikke} fordobler tabellen, så har vi at $T_i.num = T_{i-1}.num + 1$ og $T_i.size = T_{i-1}.size$:
+\begin{align*}
+  \hat{c_i} &= c_i + \Phi(T_i) - \Phi(T_{i-1})\\
+            &= 1 + (2T_i.num - T_i.size) - (2T_{i-1}.num - T_{i-1}.size)\\
+            &= 1 + (2(T_{i-1}.num + 1) - T_{i-1}.size) - (2T_{i-1}.num - T_{i-1}.size)\\
+            &= 1 + 2\\
+            &= \dunderline{3}
+\end{align*}
+
+Og hvis en indsættelse fordobler, så har vi at $c_i = T_i.num$, siden vi skal rykke alle elementerne,\\
+$T_{i-1}.num = T_{i}.num - 1$, og $T_i.size = 2T_{i}.num$, og $T_{i-1}.size = T_{i-1}.num = T_i.num - 1$:
+\begin{align*}
+  \hat{c_i} &= c_i + \Phi(T_i) - \Phi(T_{i-1})\\
+            &= T_i.num + (2T_i.num - T_i.size) - (2T_{i-1}.num - T_{i-1}.size)\\
+            &= T_i.num + (2T_i.num - 2(T_i.num - 1)) - (2(T_i.num - 1) - (T_i.num - 1))\\
+            &= T_i.num + 2  - (2T_i.num - 2 - T_i.num + 1)\\
+            &= T_i.num + 2 - T_i.num + 1
+            &= 2 + 1
+            &= \dunderline{3}
+\end{align*}
+Hvis vi indsætter et element når $\alpha(T) \geq 1/2$, så er den amortiserede pris altid $\hat{c} = 3$.\\
+
+Nu Kigger vi på indsættelse hvor $\alpha(T_{i-1}) < 1/2$.\\
+Første tilfælde er når $\alpha(T_i) < 1/2$. Her har vi at $T_{i-1}.num = T_i.num - 1$ og $T_{i-1}.size = T_i.size$:
+\begin{align*}
+  \hat{c_i} &= c_i + \Phi(T_i) - \Phi(T_{i-1})\\
+            &= 1 + (T_i.size/2 - T_i.num) - (T_{i-1}.size/2 - T_{i-1}.num)\\
+            &= 1 + (T_i.size/2 - T_i.num) - (T_i.size/2 - (T_i.num - 1))\\
+            &= 1 - 1\\
+            &= \dunderline{0}
+\end{align*}
+
+Når $\alpha(T_i) \geq$\\
+Her gør vi brug af, $T_i.num = \alpha(T_i) \cdot T_i.size$:
+\begin{align*}
+  \hat{c_i} &= c_i + \Phi(T_i) - \Phi(T_{i-1})\\
+            &= 1 + (2T_i.num - T_i.size) - (T_{i-1}.size/2 - T_{i-1}.num)\\
+            &= 1 + (2(T_{i-1}.num + 1) - T_{i-1}.size) - (T_{i-1}.size/2 - T_{i-1}.num)\\
+            &= 1 + 3T_{i-1}.num - \frac{3}{2}T_{i-1}.size + 2\\
+            &= 1 + 3\alpha(T_{i-1})\cdot T_{i-1}.size - \frac{3}{2}T_{i-1}.size + 2\\
+            &< 1 + \frac{3}{2}T_{i-1}.size - \frac{3}{2}T_{i-1}.size + 2\\
+            &= 1 + 2\\
+            &= \dunderline{3}
+\end{align*}
+
+Altså er den amortiserede cost af \texttt{TABLE-INSERT} grænset op ad til, af konstanten 3.
+
+\subsubsection{Fjern element}
+Nu kigger vi på \texttt{TABLE-DELETE} når $\alpha(T_{i-1}) < 1/2$. Ligesom med indsættelse, skal vi kigge på tilfældet hvor vi skal halvere tabellen, og hvor vi ikke skal.\\
+
+Først kigger vi på tilfældet hvor vi \underline{ikke} halverer.
+\begin{align*}
+  \hat{c_i} &= c_i + \Phi(T_i) - \Phi(T_{i-1})\\
+            &= 1 + (T_i.size/2 - T_i.num) - (T_{i-1}.size/2 - T_{i-1}.num)\\
+            &= 1 + (T_i.size/2 - T_i.num) - (T_i.size/2 - (T_i.num + 1))\\
+            &= 1 - T_i.num + T_i.num + 1\\
+            &= \dunderline{2}
+\end{align*}
+
+I tilfældet hvor vi skal halverer, så er vi at $c_i= T_{i-1}.num$, siden vi skal rykke alle elementer i den mindre tabel.\\
+Derudover har vi, at $T_{i}.size/2 = T_{i-1}.size/4 = T_{i-1}.num = T_inum + 1$, siden vi ved vi har $\alpha(T_i) = 1/4$ når vi halverer:
+\begin{align*}
+  \hat{c_i} &= c_i + \Phi(T_i) - \Phi(T_{i-1})\\
+            &= T_{i-1}.num + (T_i.size/2 - T_i.num) - (T_{i-1}.size/2 - T_{i-1}.num)\\
+            &= (T_i.num + 1) + ((T_i.num + 1) - T_i.num) - (2(T_i.num + 1) - (T_i.num + 1))\\
+            &= T_i.num + 1 + 1 - (T_i.num + 2 - 1)\\
+            &= T_i.num + 2 - T_i.num - 1\\
+            &= \dunderline{1}
+\end{align*}
+
+Til sidst kigger vi på de to tilfælder hvor $\alpha(T_{i-1}) \geq 1/2$, og der så enten gælder at $\alpha(T_i) < 1/2$ eller $\alpha(T_i) \geq 1/2$.\\
+
+Hvis $\alpha(T_i) < 1/2$.\\
+Her bruger vi igen at vi ved, at $T_i.num = \alpha(T_i)\cdot T_i.size$:
+\begin{align*}
+  \hat{c_i} &= c_i + \Phi(T_i) - \Phi(T_{i-1})\\
+            &= 1 + (T_i.size/2 - T_i.num) - (2T_{i-1}.num - T_{i-1}.size)\\
+            &= 1 + (T_i.size/2 - T_i.num) - (2(T_i.num + 1) - T_i.size)\\
+            &= 1 + \frac{3}{2}T_i.size - 3T_i.num_i - 2\\
+            &= -1 + \frac{3}{2}T_i.size - 3\alpha(T_i) \cdot T_i.size\\
+            &< -1 + \frac{3}{2}T_i.size - \frac{3}{2}T_i.size\\
+            &= \dunderline{-1}
+\end{align*}
+
+Hvis $\alpha{T_i} \geq 1/2$:
+\begin{align*}
+  \hat{c_i} &= c_i + \Phi(T_i) - \Phi(T_{i-1})\\
+            &= 1 + (2T_i.num - T_i.size) - (2T_{i-1}.num - T_{i-1}.size)\\
+            &= 1 + (2T_i.num - T_i.size) - (2(T_i.num + 1) - T_i.size)\\
+            &= 1 + 2T_i.num - T_i.size - 2T_i.num - 2 + T_i.size\\
+            &= 1 - 2\\
+            &= \dunderline{-1}
+\end{align*}
+
+Nu har vi vidst at to egenskaber holder -- Load-factoren $\alpha(T_i)$ er grænset ned af til, af en konstant $1/4$, og vores to tabel operationer er grænset op af til af konstanten 3.\\
+$n$ operationer er derfor $Ø(n)$ hvilket giver at hver operation er $Ø(1)$. $\blacksquare$
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "master"
+%%% End:
