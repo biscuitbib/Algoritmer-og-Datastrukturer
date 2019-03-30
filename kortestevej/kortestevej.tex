@@ -8,12 +8,20 @@
   \item Egenskaber af en korteste vej
   \end{itemize}
 \item Bellman-Ford
+  \begin{itemize}
+  \item Køretid
+  \item Korrekthed
+  \end{itemize}
 \item Dijkstra
+  \begin{itemize}
+  \item Korrekthed
+  \item Køretid
+  \end{itemize}
 \end{itemize}
 
 \newpage
 \subsection{Korteste vej problemet}
-Givet en \textbf{orienteret graf} $G = (V,E)$ med en vægtsfunktion$w(u,v)$ for $(u,v) \in G.E$, så går korteste vej problemet ud på at finde en vej $p$, som er en følge af kanter i $G.E$, med en minimal vægt $w(p)$, hvore vægtsfunktionen på en vej, er summen af vægtene i dens kanter.\\
+Givet en \textbf{orienteret graf} $G = (V,E)$ med en vægtsfunktion$w(u,v)$ for $(u,v) \in G.E$, altså $w : E \rightarrow \mathbb{R}$, så går korteste vej problemet ud på at finde en vej $p$, som er en følge af kanter i $G.E$, med en minimal vægt $w(p)$, hvore vægtsfunktionen på en vej, er summen af vægtene i dens kanter.\\
 
 Vi definerer vægten af den korteste vej fra $u$ til $v$ til at være
 
@@ -67,58 +75,192 @@ Alle knuder bliver initialiseret til $v.d = \infty$ og $v.\pi=\texttt{NIL}$, udo
 
 Vi bruger følgende egenskaber af en korteste vej:\\
 
-\textbf{Trekants uligheden}
+\begin{itemize}
+\item \textbf{Trekants uligheden}
+  \begin{lemma}
+    Lad $G = (V,E))$ være en orienteret graf med vægtsfunktion $w(u,v)$ på en kant $(u,v) \in G.E$. Lad $s$ være startknuden. Der gælder for alle kanter $(u,v)$
+    $$\delta(s,v) \leq \delta(s,u) + w(u,v)$$.
+  \end{lemma}
+
+  \begin{proof}
+    Antag at $p$ er den korteste vej fra $s$ til $v$, så kan der ikke findes en vej med lavere vægt fra $s$ til $v$, så derfor, hvis kanten $(u,v)$ er i $p$, så må $p$ gå igennem $u$, altså
+    $p_{sv} = p_{su} + (u,v)$
+  \end{proof}
+
+
+\item \textbf{En øvre grænse egenskaben}
+  \begin{lemma}
+    Lad $G = (V,E))$ være en orienteret graf med vægtsfunktion $w(u,v)$ på en kant $(u,v) \in G.E$. Lad $s$ være startknuden. Lad $s$ være startknuden. grafen bliver intitialiseret således at alle knuder $v \neq s \in G.V$ har $v.d = \infty$. Der gælder at $v.d \geq \delta(s,v)$, som invariant over alle relaxation operationer. Når $v.d$ får sin nedre grænse $\delta(s,v)$ forbliver den uændret. 
+  \end{lemma}
+
+  \begin{proof}
+    Vi beviser invarianten $v.d \geq \delta(s,v)$ med induktion over antallet af relaxations.\\
+    Base-case er sandt, siden $v.d = \infty \Rightarrow v.d \geq \delta(s,v)$.\\
+    For det induktive trin kalder vi relax på en kant $(u,v)$, hvor vi antager at $v.d > \delta(s, u) + w(u,v)$, da relax ellers ikke ændrer noget og er derfor sandt.\\
+    \begin{align*}
+      v.d &= u.d + w(u,v)&\\
+          &\geq \delta(s,u) + w(u,v) &\text{ (Det induktive trin)}\\
+          &\geq \delta(s,v)          &\text{ (Trekants uligheden)}
+    \end{align*}
+
+    Grunden til $v.d$ ikke ændrer sig når den når sin nedre grænse er, at når $v.d = \delta(s,v)$, kan den ikke blive lavere, da $\delta(s,v)$ er den korteste vægtede vej. Den kan heller ikke stige, da relax kun ændrer værdien hvis $v.d > \delta(s,u) + w(u,v)$.
+  \end{proof}
+
+
+\item \textbf{Ingen vej egenskaben}
+  \begin{corollary}
+    Lad $G = (V,E))$ være en orienteret graf med vægtsfunktion $w(u,v)$ på en kant $(u,v) \in G.E$. Lad $s$ være startknuden. Lad $s$ være startknuden. Hvis der ikke findes en vej fra $s$ til en anden knude $v \in G.V$, så har vi at $v.d$ er initialiseret til $v.d = \infty = \delta(s,v)$, og den ændrer sig ikke over alle relax trin på kanterne i $G.E$.
+  \end{corollary}
+
+  \begin{proof}
+    På grund af den øvre grænse egenskab, har vi at $\infty = \delta(s,v) \leq v.d$ og derfor må $v.d = \infty$, og kan ikke blive lavere.
+  \end{proof}
+
+  \begin{lemma}
+    Lad $G = (V,E))$ være en orienteret graf med vægtsfunktion $w(u,v)$ på en kant $(u,v) \in G.E$. Lad $s$ være startknuden. Lad $(u,v) \in G.E$. Lige efter et kald på relax $(u,v)$ gælder at $v.d \leq u.d + w(u,v)$.
+  \end{lemma}
+
+  \begin{proof}
+    Hvis kaldet til relax ændrer $v.d$, så må det gælde før kaldet, at $v.d > u.d + w(u,v)$, derfor må $v.d = u.d + w(u,v)$ efter kaldet. Hvis vi ikke ændrer $v.d$ efter kaldet, må det i forvejen gælde, at
+    $v.d \leq u.d + w(u,v)$.
+  \end{proof}
+
+\item \textbf{Konvergens egenskaben}
+  \begin{lemma}
+    Lad $G = (V,E))$ være en orienteret graf med vægtsfunktion $w(u,v)$ på en kant $(u,v) \in G.E$. Lad $s$ være startknuden og lad
+    $$s \leadsto u \rightarrow v$$
+    være den korteste vej i $G$ for knuderne $u$ og $v$. Knuderne blivere initialiseret, og hvis efter en række relax trin, at $u.d = \delta(s,u)$, vil $v.d = \delta(s,v)$ efter det næste relax trin, og alle trin efter.
+  \end{lemma}
+
+  \begin{proof}
+    Vi ved fra den øvre grænse egenskab, at hvis $u.d = \delta(s,v)$, vil den forblive sådan efter alle fremtidige relax kald. Efter et relax kald på kanten $(u,v)$ har vi
+    \begin{align*}
+      v.d &\leq u.d + w(u,v) &\text{ (Fra Lemma 7.4)}\\
+          &= \delta(s,u) + w(u,v)&\\
+          &= \delta(s,v)     &\text{ (Fra Lemma 7.1, } p_{uv} \subset p_{sv})
+    \end{align*}
+    Hvis $v.d \leq \delta(s,v)$, må $v.d=\delta(s,v)$.
+  \end{proof}
+
+
+\item \textbf{Vej-relaxation egenskaben}
+  \begin{lemma}
+    Lad $G = (V,E))$ være en orienteret graf med vægtsfunktion $w(u,v)$ på en kant $(u,v) \in G.E$. Lad $s$ være startknuden. Hvis $p = \langle v_0, v_1, ..., v_k\rangle$, hvor $v_0 = s$, er den korteste vej fra $s \leadsto v_k$. Hvis vi, efter at initialiseret, har relaxet kanterne $(v_0, v_1), (v_1, v_2), ..., (v_{k-1}, v_k)$, så vil $v_k.d = \delta(s,v_k)$ efter det sidste relax kald, og alle fremtidige kald. Denne egenskab gælder også hvis relax bliver kaldt på andre kanter i $e \in G.E$.
+  \end{lemma}
+
+  \begin{proof}
+    Vi viser ved induktion, at efter $i$ relax kald på $p$, så er $v_i.d = \delta(s,v_i)$.\\
+    Base case er når $i=0$, så har vi at $v_0.d = s.d = 0 = \delta(s,s)$.
+    Nu antager vi at $v_{i-1}.d = \delta(s, v_{v - 1})$, og vi kalder relax på kanten $(v_{i-1}, v_i)$. På grund af konvergens egenskaben, vil $v_i.d = \delta(s,v_i)$ efter relax kaldet.
+  \end{proof}
+
+
+\item\textbf{Forgænger delgraf egenskaben}
+  \begin{lemma}
+  \end{lemma}
+
+  \begin{proof}
+  \end{proof}
+
+\end{itemize}
+
+\subsection{Bellman-Ford}
+Bellman-Ford algoritmen løser korteste vej problemet hvor vi tillader negative vægte. Algoritmen initialiserer alle knuderne, og derefter kører den et loop $|G.V| - 1$ og for hvert loop kalder den relax på alle kanter $(u,v) \in G.E$. Altså bliver hver kant relaxet $|V| - 1$ gange, og til sidst tjekker algoritmen alle kanter for
+$$v.d > u.d + w(u,v)$$
+
+Hvis en kant opfylder dette, så må det betyde, at grafen indeholder en negativ cykel, og algoritmen returnerer \texttt{FALSE}, ellers returnerer den \texttt{TRUE}, og den korteste vej kan konstrueres ved at følge en kants forælder -- $v.\pi$.\\
+
+\subsubsection{Køretid}
+af Bellman-Ford er $Ø(VE)$ da initialisering tager $\Theta(E)$ og vi går igennem alle $\Theta(E)$ kanter $|V| - 1$ gange, altså $O(VE)$. Det sidste loop er $Ø(E)$.\\
+
+Korrektheden viser vi, ved at vise at tjekket vi laver i det sidste loop er korrekt.
 \begin{lemma}
-  Lad $G = (V,E))$ være en orienteret graf med vægtsfunktion $w(u,v)$ på en kant $(u,v) \in G.E$. Lad $s$ være startknuden. Der gælder for alle kanter $(u,v)$
-  $$\delta(s,v) \leq \delta(s,u) + w(u,v)$$.
+  Lad $G = (V,E)$ være en orienteret graf med vægtsfunktion $w(u,v)$ på kanter $(u,v) \in G.E$. Lad $s$ være startknuden.\\
+  Vi antager at $G$ ikke indeholder negative cykler, som kan nås fra $s$. Så efter $|V| - 1$ relaxations af alle kanter, har vi at $v.d = \delta(s,v)$ for alle knuder $v$ der kan nås fra $s$.
 \end{lemma}
 
 \begin{proof}
-  Antag at $p$ er den korteste vej fra $s$ til $v$, så kan der ikke findes en vej med lavere vægt fra $s$ til $v$, så derfor, hvis kanten $(u,v)$ er i $p$, så må $p$ gå igennem $u$, altså
-  $p_{sv} = p_{su} + (u,v)$
+  Vi bruger vej-relaxations egenskaben for grafen $G$. lad $p \langle s, v_1, v_2 , ..., v_k\rangle$ være den korteste vej $s \leadsto v_k$. Fordi korteste veje er simple, er der højst $|V| - 1$ knuder i $p$, og derfor har vi $k \leq |V| - 1$. Efter $i$ relaxationskald, har vi, på grund af vej-relaxationsegenskaben, at $v_k.d = \delta(s,v_k)$.
 \end{proof}
 
-
-\textbf{En øvre grænse egenskaben}
-\begin{lemma}
-  Lad $G = (V,E))$ være en orienteret graf med vægtsfunktion $w(u,v)$ på en kant $(u,v) \in G.E$. Lad $s$ være startknuden. Lad $s$ være startknuden. grafen bliver intitialiseret således at alle knuder $v \neq s \in G.V$ har $v.d = \infty$. Der gælder at $v.d \geq \delta(s,v)$, som invariant over alle relaxation operationer. Når $v.d$ får sin nedre grænse $\delta(s,v)$ forbliver den uændret. 
-\end{lemma}
+\subsubsection{Korrekthed}
+\begin{theorem}[Korrekthed af Bellman-Ford]
+  
+  Vi kører Bellman-Ford på en orienteret graf $G = (V, E)$ med vægtsfunktion $w : G.E \rightarrow \mathbb{R}$. Lad $s$ være startknuden.\\
+  Hvis $G$ ikke har nogen negative cykler, så returnerer Bellman-Ford \texttt{TRUE}, og $v.d = \delta(s,v)$ for alle $v \in G.V$, og forgænger delgrafen $G_\pi$udgør et træ med rod $s$.\\
+  Hvis $G$ har negative cykler, der kan nås fra $s$, returnerer Bellman-Ford \texttt{FALSE}.
+\end{theorem}
 
 \begin{proof}
+  Vi kigger på første tilfælde, hvor $G$ ikke har negative cykler.\\
+  Vi har at $v.d = \delta(s,v)$. Hvis $s \leadsto v$, så beviser lemma 7.8 dette, ellers hvis der ikke er en vej fra $s$ til $v$, så beviser ingen vej egenskaben, at det også gælder. Forgænger delgraf egenskaben viser at $G_\pi$ er korteste vej træet.\\
+  Nu viser vi at Bellman-Ford returnerer \texttt{TRUE}, ved at vise
+  \begin{align*}
+    v.d &= \delta(s,v)\\
+        &\leq \delta{s,u} + w(u,v) \text{ (Ved trekants uligheden)}\\
+        &= u.d + w(u,v)
+  \end{align*}
+
+  Antage at der findes en negativ cykel, så vil vi vise at Bellman-Ford returnerer \texttt{FALSE}.\\
+  Lad cyklen være $c = \langle v_0, v_1, ..., v_k\rangle$ hvor $v_0 = v_k$, så har vi
+  $$\sum_{i = 1}^k w(v_{i-1},v_i) < 0$$
+
+  Vi antager nu at Bellman-Ford returnerer \texttt{TRUE}, så gælder $v_i.d \leq v_{i-1}.d + w(v_{i-1},v_i)$, for alle $i = 1, 2, ..., k$. Hvis vi summere alle ulighederne, har vi
+  \begin{align*}
+    \sum_{i=1}^k v_i.d &\leq \sum_{i=1}^k (v_{i-1}.d + w(v_{i-1}, v_i))\\
+                       &= \sum_{i=1}^k v_{i-1}.d + \sum_{i=1}^k w(v_{i-1}, v_i)\\
+  \end{align*}
+
+  Da $v_0 = v_k$ har vi også at
+  $$\sum_{i=1}^k v_i.d = \sum_{i=1}^k v_{i-1}.d \Rightarrow \sum_{i=1}^k v_i.d - \sum_{i=1}^k v_{i-1}.d = 0$$
+
+  altså
+  $$0 \leq \sum_{i=1}^k w(v_{i-1}, v_i)$$
+  Hvilket er i modstrid med at cyklen har negativ vægt. Altså, en korteste vej med negativ vægt kan ikke returnere \texttt{TRUE}, og må derfor returnerer \texttt{FALSE}.
 \end{proof}
 
+\subsection{Dijkstra}
+Dijkstras algoritme finder den korteste vej på grafer \underline{uden} negative vægte, altså $w(u,v) \geq 0$ for alle $(u,v) \in G.E$.\\
 
-\textbf{Ingen vej egenskaben}
-\begin{corollary}
-\end{corollary}
+Algoritmen holder en mængde $S$ af knuder, hvis korteste vej er fundet, og for iteration vælger den en ny knude i $v \in V-S$ med det laveste estimat $v.d.$. I implementationen bruger vi en min-prioritets kø til at kunne tage en knude med minimum $v.d$ værdi.\\
+
+Først initialiseres alle knuder, $S = \emptyset$, og $Q=G.V$. Herefter trækker vi en knude $u$ fra $Q$ med minimums estimat. Som starter ud med at være $s.d = 0$. Vi tilføjer den til $S$, og så relaxer vi alle kanter $(u,v)$ for $v \in u.adj$, hvor $adj$ er knudens naboliste.\\
+Algoritmen holder en invariant $Q = G.V-S$ ved begyndelsen af hver iteration.\\
+
+\subsubsection{Korrekthed}
+\begin{theorem}[Korrekthed af Dijkstras algoritme]
+  Vi kører Dijkstras algoritme på en orienteret graf $G = (V, E)$ med vægtsfunktion $w : G.E \rightarrow \mathbb{R}_{\geq 0}$. Lad $s$ være startknuden.\\
+  Algoritmen slutter med $u.d = \delta(s,u)$ for alle knuder $v \in G.V$.
+\end{theorem}
 
 \begin{proof}
+  Vi beviser det med følgende invarians:\\
+  \begin{center}
+    Ved begyndelsen af hver iteration, er $v.d = \delta(s,v)$ for $v \in S$.
+  \end{center}
+
+  Vi viser at når vi tilføjer en knude $u \in G.V$ til $S$, så er $u.d = \delta(s,u)$, da vi ved fra den øvre grænse egenskab, at den ikke vil ændre sig efter.\\
+
+  \begin{itemize}
+  \item \textbf{Initialisering}: I starten er $S=\emptyset$ og invarianten er trivielt sand.
+  \item \textbf{Vedligeholdelse}: Vi ønsker at vise $u.d = \delta(s,u)$ når vi tilføjer $u$ til $S$. Lad os antage at $u$ er den første knude hvor $u.d \neq \delta(s,u)$ når vi tilføjer den til $S$. Vi ved at $u \neq s$ fordi $s$ er allerede i $S$, og fordi $S \neq \emptyset$, må der være en vej fra $s$ til $u$, ellers ville $u.d = \infty = \delta(s,u)$ ifølge ingen vej egenskaben.\\
+
+    Siden der er en vej fra $s$ til $u$, må der også være en korteste vej fra $s$ til $u$. Før $u$ kommer i $S$, der der en knude $x \in S$ og en knude $y \not\in S$, således at $s \leadsto x \rightarrow y \leadsto u$.\\
+    Vi påstår at $y.d = \delta(s,y)$ når $u$ kommer i $S$. Vi ved at $x.d = \delta(s,x)$, og på grund af konvergens egenskaben har vi at $(x,y)$ blev relaxed, og derfor er $y.d = \delta(s,y)$. Fordi $y$ kommer før $u$, har vi
+    \begin{align*}
+      y.d &= \delta(s,y)\\
+          &\leq \delta(s,u)\\
+          &\leq u.d \text{ (Ved øvre grænse egenskaben)}
+    \end{align*}
+
+    Men fordi vi vælger den knude med lavest estimat i $V-S$ gælder også $u.d \leq y.d$, hvilket fører til $y.d = \delta(s,y) = \delta(s,u) = u.d$, hvilket er i modstrid med, at $u.d \neq \delta(s,u)$.\\
+    Derfor må $u.d = \delta(s,u)$ når vi tilføjer $u$ til $S$.
+    \item \textbf{Afslutning}: Når vi har tilføjet den sidste knude i $S$ er $Q=\emptyset$, hvilket må betyde at $S = V$. Derfor er $u.d = \delta(s,u)$ for alle $u \in G.V$.
+  \end{itemize}
 \end{proof}
 
-
-\textbf{Konvergens egenskaben}
-\begin{lemma}
-\end{lemma}
-
-\begin{proof}
-\end{proof}
-
-
-\textbf{Vej-relaxation egenskaben}
-\begin{lemma}
-\end{lemma}
-
-\begin{proof}
-\end{proof}
-
-
-\textbf{Forgænger delgraf egenskaben}
-\begin{lemma}
-\end{lemma}
-
-\begin{proof}
-\end{proof}
-
+\subsubsection{Køretid}
+Vi kan opnå en køretid på $Ø(VlgV + E)$ ved at bruge en Fibonacci hob til at implementere min-prioritetskøen. Insert er theta(lgn) < theta(1), decrease-key er theta(lgn) < theta(1) extract-min theta(lgn) < O(lgn)
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "master"
