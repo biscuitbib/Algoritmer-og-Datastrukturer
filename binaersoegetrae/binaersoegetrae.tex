@@ -9,6 +9,11 @@
   \item Indsættelse og sletning
   \end{itemize}
 \item Rød-sort træ - Balanceret binært søgetræ
+  \begin{itemize}
+  \item En øvre grænse for højden
+  \item Indsættelse
+  \item Sletning
+  \end{itemize}
 \item Krydsende linjesegmenter
 \end{itemize}
 
@@ -72,7 +77,20 @@
 \end{proof}
 
 \subsection{Rød-sort træ - Balanceret binært søgetræ}
+Et rød-sort træ er et binært træ med et ekstra felt i hver knude, dets farve $x.color$ som er enten rødt eller sort, heraf navnet.\\
+Et rød-sort træ er et \textbf{balanceret} binært træ, som sørger for at holde en øvre grænse på højden $h$. Det understøtter følgende egenskaber:
+\begin{itemize}
+\item Hver knude er enten rød eller sort.
+\item Roden af træet er sort.
+\item Hvert blad er $T.nil$.
+\item Hvis en knude er rød, er begge dets børn sorte.
+\item For hver knude, alle simple paths ned til et blad indeholder lige mange sorte knuder.
+\end{itemize}
+Rød-sort træet bruger et \textbf{NIL} felt $T.nil$ til at fungere som alle bladene og som rodens forælder. $T.nil$ har farven sort, så alle blade i træet bliver set som sorte.\\
 
+Vi definerer også en funktion $bh(x)$ på en knude $x$ til at være den knudes \textbf{black-height}, som er antallet af sorte knuder, eksklusiv sig selv, i en simpel path fra $x$ ned til et blad.\\
+
+\subsubsection{En øvre grænse for højden}
 \begin{lemma}
   Et rødt-sort træ med $n$ knuder har en højde på højst $2lg(n+1) = Ø(lgn)$
 \end{lemma}
@@ -97,6 +115,78 @@
 
   Ergo har vi vist at højden er $h$ er højst $2lg(n+1)$ og derved $h=Ø(lgn)$.
 \end{proof}
+
+Ved at vise at rød-sort træer har en øvre grænse på højden af $Ø(lgn)$, betyder det, at alle operationer på et binært træ der havde $Ø(h)$ har nu en køretid på $Ø(lgn)$.
+
+\subsubsection{Rotation}
+Rotation er en ombytning af pointere, som bruges til at opretholde rød-sort egenskaber efter en indsættelse eller sletning.
+
+
+\begin{center}
+    \begin{tikzpicture}[>=latex, every node/.style = {shape=circle, draw, align=center}, level distance=1cm]
+      \node(A) at (0, 0) {$y$}
+      child{ node {$x$}
+        child { node[draw=none] {$\alpha$} }
+        child { node[draw=none] {$\beta$} }}
+      child{ node[draw=none] {$\gamma$} };
+
+      \node(B) [right=5cm of A] {$x$}
+      child { node[draw=none] {$\alpha$} }
+      child { node {$y$}
+        child { node[draw=none] {$\beta$} }
+        child { node[draw=none] {$\gamma$} }};
+
+      \draw[dashed, ->] (A) -- node[draw=none, label=above:Left-rotate] {} (B);
+    \end{tikzpicture}
+\end{center}
+
+Intuitionen for hvorfor man må rykke på pegerne kan ses her.\\
+Nedenfor ses et diagram af forholdene mellem knuderne $x, y$ og deltræerne $\alpha, \beta, \gamma$. Pilene er en peger til en knudes børn. Så længe en peger for en knudes højre barn, peger til en knude til højre, og vice versa for venstre peger, så kan man rykke rundt på pegerne.
+\begin{center}
+\begin{tikzpicture}[>=latex]
+  \draw[draw=none] (0,0) --
+  node(A)[pos=.0, label=below:{$\alpha$}] {}
+  node [pos=.1] {$\leq$} 
+  node(B)[pos=.2, label=below:{$x$}] {}
+  node [pos=.3] {$\leq$}
+  node [pos=.4, label={[label distance=1cm]above:{Før left-rotate}}] {}
+  node [pos=.4, label={[label distance=1cm]below:{Efter left-rotate}}] {}
+  node(C)[pos=.4, label=below:{$\beta$}] {}
+  node [pos=.5] {$\leq$} 
+  node(D)[pos=.6, label=below:{$y$}] {}
+  node [pos=.7] {$\leq$} 
+  node(E)[pos=.8, label=below:{$\gamma$}] {}
+  (10,0)
+  ;
+
+  \draw[fill, ]
+  (A) circle [radius=0.05]
+  (B) circle [radius=0.05]
+  (C) circle [radius=0.05]
+  (D) circle [radius=0.05]
+  (E) circle [radius=0.05]
+  ;
+  % før
+  \draw[dashed, <-] (A) to[bend left=50] (B);
+  \draw[dashed, ->] (B) to[bend left=50] (C);
+  \draw[dashed, <-] (B) to[bend left=50] (D);
+  \draw[dashed, ->] (D) to[bend left=50] (E);
+  % efter
+  \draw[dashed, ->] (B) to[bend left=50] (A);
+  \draw[dashed, <-] (D) to[bend left=50] (B);
+  \draw[dashed, ->] (D) to[bend left=50] (C);
+  \draw[dashed, <-] (E) to[bend left=50] (D);
+\end{tikzpicture}
+\end{center}
+
+Right-rotate er den inverse af left-rotate.
+\subsubsection{Indsættelse}
+Vi kan indsætte i $Ø(lgn)$ tid, med en lille ændring i algoritmen. Ved kald af \texttt{INSERT($T,z$)} indsætter vi $z$ i vores træ som normalt og giver den en rød farve $z.color=red$. Derefter bruger vi en hjælpe funktion \texttt{RB-INSERT-FIXUP}, som sørger for at træet stadig overholder rød-sort egenskaberne efter indsættelse.\\
+
+
+
+\subsubsection{Sletning}
+
 \subsection{Krydsende linjesegmenter}
 Hvis man har en mængde linjesegmenter og man ønsker at finde ud af om nogen af linjesegmenterne krydser hinanden kan man bruge en metode kaldet \textbf{sweeping}.\\
 Sweeping algoritmen bruger en lodret \textbf{sweep line} som kører over mængden af linjesegmenter, og vi betegner den dimension som sweep line bevæger sig over, $x$-aksen, en dimension af tid. Vi antager to ting om vores linjesegmenter, ingen af linjesegmenterne er lodrette linjer, og højst to linjesegmenter kan overlappe på et punkt.\\

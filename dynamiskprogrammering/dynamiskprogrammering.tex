@@ -26,8 +26,13 @@ Dynamisk programmering, ligesom del og hersk, løser problemer ved at dele dem o
 
 Der er 4 trin man følger for et dynamisk programmering problem:
 \begin{itemize}
-\item 
+\item Karakteriser en optimal løsnings struktur.
+\item Rekursivt definer værdien af en optimal løsning.
+\item Bestem værdien af en optimal løsning.
+\item Konstruer selve den optimale løsning ud fra de løste værdier.
 \end{itemize}
+
+De første 3 trin giver værdien til en optimal løsning, mens det sidste trin er valgfrit, og giver løsningen der hører til værdien. 
 
 \subsection{Rod-Cutting}
 Man får givet en stav af længde $n$ og en liste $p_i$ med priser, således at en stav af længde $k$ har prisen $p_k$. Med en stav af længde $n$ er der $2^{n-1}$ måder at skære staven på - ved hver længde kan man enten vælge at skære, eller ikke at skære.\\
@@ -154,7 +159,7 @@ Nu har vi at $Z_{k-1}$ er en LCS af $X_{m-1}$ og $Y_{n-1}$. Lad os antage at der
 Altså, hvis $x_m = y_n$, så er $Z_{k-1}$ en LCS af $X_{m-1}$ og $Y_{n-1}$.\\
 
 2. tilfælde:\\
-Hvis $x_m \neq y_m$ og vi antager at $z_k \neq x_m$, så må $Z$ være en LCS af $X_{m-1}$ og $Y$. Altså, vi fjerner halen af $X$ indtil det sidste element i $X$ og $Y$ er ens.\\
+Hvis $x_m \neq y_m$ og vi antager at $z_k \neq x_m$, så må $Z$ være en LCS af $X_{m-1}$ og $Y$.\\
 Hvis vi antager at der findes en fælles delfølge $W$ af $X_{m-1}$ og $Y$, som har længde større end $k$, så ville $W$ også være en fælles delfølge af $X_m$ og $Y$, siden vi fra tilfælde 1 ved at vi ikke kan tilføje $X_m=y_n$. Dette er i modstrid med at $Z$ er en LCS af $X$ og $Y$, siden $W$ har længde større end $k$\\
 Altså, hvis halerne i $X$ og $Y$ ikke er ens, men $z_k=y_n$, så fjerner vi $i$ elementer halen af $X$, indtil vi finder et fælles element. $Z_{k-1}$ er så en delfølge af $X_{m-i}$ og $Y_{n-1}$\\
 
@@ -195,3 +200,12 @@ Hver af disse to delproblemer skal så løse tilsvarende delproblemer. Et træ f
 
 \subsubsection{Dynamisk programmering algoritmen}
 Hvis vi bruger dynamisk programmering til at gemme løsninger til delproblemerne kan vi se, at vi skal løse $\Theta(mn)$ unikke delproblemer, hvilket også giver køretiden $Ø(mn)$. Løsningen til LCS problemet kan udregnes ved ligning (1), hvor $c$ arrayet indeholder alle delproblemerne. For at konstruere selve følgen, skal vi også gemme værdien i hver af de to følger $X$ og $Y$ i et array, når $x_i = y_j$.
+
+\subsubsection{Recap af de 4 trin}
+De fire trin der hører til at løse LCS problemet med dynamisk programmering er:
+\begin{itemize}
+\item Vi bestemte hvordan strukturen for en LCS var, ved at vise optimal delstruktur.
+\item Derefter bestemte vi rekursivt hvordan vi skulle finde den optimale løsning, og vi så at problemet udviste overlappende delproblemer.
+\item Vi bruger ligning (1) til at beskrive en algoritme der returnerer et 2-dimensionelt array $c$ hvor $c[m,n]$ indeholder længden af LCS'en til $X_m$ og $Y_n$\\
+\item Valgfrit kan algoritmen også returnere et 2-dimensionelt array $b$ der viser hvordan vi kan konstruere et LCS.
+\end{itemize}

@@ -1,5 +1,123 @@
 \section{Korteste Vej}
 \hrulefill
+\begin{itemize}
+\item Korteste vej problemet
+  \begin{itemize}
+  \item Optimal delstruktur
+  \item Cykler i grafen
+  \item Egenskaber af en korteste vej
+  \end{itemize}
+\item Bellman-Ford
+\item Dijkstra
+\end{itemize}
+
+\newpage
+\subsection{Korteste vej problemet}
+Givet en \textbf{orienteret graf} $G = (V,E)$ med en vægtsfunktion$w(u,v)$ for $(u,v) \in G.E$, så går korteste vej problemet ud på at finde en vej $p$, som er en følge af kanter i $G.E$, med en minimal vægt $w(p)$, hvore vægtsfunktionen på en vej, er summen af vægtene i dens kanter.\\
+
+Vi definerer vægten af den korteste vej fra $u$ til $v$ til at være
+
+$$
+\delta(uv) =
+\begin{cases}
+  min{w(p)} & \text{ hvis der findes en vej } p \text{ fra } u \text{ til } v\\
+  \infty & \text{ ellers}
+\end{cases}
+$$
+
+Der er 4 varianter af korteste vej problemet:
+\begin{itemize}
+\item \textbf{Single-pair} bestemmer den korteste afstand fra en knude $u$ til en knude $v$.
+\item \textbf{Single-source} bestemmer den korteste afstand fra en knude $s$ til alle andre knuder i $G.E$.
+\item \textbf{Single-target} bestemmer den korteste afstand fra alle knuder i $G.E$ til en knude $t$.
+\item \textbf{All-pairs} bestemmer den korteste afstand fra alle knuder i $G.E$ til alle andre knuder i $G.E$.
+\end{itemize}
+
+De to algortimer vi kommer til at kigge på er single-source korteste vej.\\
+
+\subsubsection{Optimal delstruktur}
+Problemet at finde den korteste vej udviser optimal delstruktur.
+
+\begin{lemma}
+  Givet en orierenteret graf $G = (V,E)$ med vægtsfunktion $w(u,v)$. Lad $p = \langle v_0, v_1, ..., v_k\rangle$ være den korteste vej $v_0 \leadsto v_k$. For alle $i,j$ således at $0 \leq i \leq j \leq k$, lad $p_{ij} = \langle v_i, v_{i+1}, ..., v_j\rangle$ være en delvej $v_i \leadsto v_j$, så er $p_{ij}$ den korteste vej fra $v_i$ til $v_j$.
+\end{lemma}
+Altså, alle delveje af en korteste vej, er også selv korteste veje.\\
+
+\begin{proof}
+  Hvis vi kigger på delvejene $v_0 \leadsto v_i \leadsto v_j \leadsto v_k$, så har vi at
+  $$w(p) = w(p_{0i}) + w(p_{ij} + w(p_{jk})$$
+  Antag så, at der findes en anden vej $p'_{ij}$ således at $w(p'_{ij}) < w(p_{ij})$, så kan vi indsætte $p'_{ij}$ i $p$, og få
+  $$w(p') = w(p_{oi}) + w(p'_{ij}) + w(p_{jk}) < w(p)$$
+  Hvilket er i modstrid med at $p$ var en korteste vej.
+\end{proof}
+
+
+\subsubsection{Cykler i grafen}
+Hvis vi tillader at kanter kan have en negativ vægt, så kan vi løbe ind i problemer med negative cykler i grafen.\\
+Hvis grafen $G$ indeholder en cykel, som kan nås fra vores startknude $s$, hvor summen af vægtene i cyklen er negativ, så er korteste vej problemet udefinerbart. Siden cyklen har negativ sum, kan vi bare kører flere omgange om cyklen, og få en vej, som har $\delta(s,t) = -\infty$.\\
+
+Det giver heller ikke mening at inkluderer positive cykler i den korteste vej. Hvis en vej $p = s \leadsto t$ indeholder en positiv cykel, så må der være en knude $u$ i cyklen, hvor $s \leadsto u$ og $u \leadsto t$. Da cyklen starter og slutter i $u$, kan vi lave en vej $p'$ hvor vi har fjernet alle knuderne i cyklen, undtagen $u$ fra $p$, og have $w(p') < w(p)$.\\
+
+En korteste vej indeholder derfor ingen cykler.
+
+\subsubsection{Egenskaber af en korteste vej}
+Korteste vej algoritmerne bruger en teknik \textbf{relaxation}. Hver knude $v$ har et felt $v.d$ som er en øvre grænse for den korteste vej  $s \leadsto v$. Derudover har de også et felt $v.\pi$, som er pegeren til den foregående knude i den korteste vej, således at vi kan konstruere selve den korteste vej.\\
+
+Alle knuder bliver initialiseret til $v.d = \infty$ og $v.\pi=\texttt{NIL}$, udover $s.d=0$. Selve relax funktionene tager to knuder $u$ og $v$, og ser om $v.d > u.d + w(u,v)$, hvis den er, bliver $v.d = u.d + w(u,v)$ og $v.\pi = u$. Altså, hvis $p_{su} + w(u,v) < p_{sv}$, så kan vi sige, at den korteste vej fra $s$ til $v$ går igennem $u$ -- $s \leadsto u \leadsto v$.\\
+
+Vi bruger følgende egenskaber af en korteste vej:\\
+
+\textbf{Trekants uligheden}
+\begin{lemma}
+  Lad $G = (V,E))$ være en orienteret graf med vægtsfunktion $w(u,v)$ på en kant $(u,v) \in G.E$. Lad $s$ være startknuden. Der gælder for alle kanter $(u,v)$
+  $$\delta(s,v) \leq \delta(s,u) + w(u,v)$$.
+\end{lemma}
+
+\begin{proof}
+  Antag at $p$ er den korteste vej fra $s$ til $v$, så kan der ikke findes en vej med lavere vægt fra $s$ til $v$, så derfor, hvis kanten $(u,v)$ er i $p$, så må $p$ gå igennem $u$, altså
+  $p_{sv} = p_{su} + (u,v)$
+\end{proof}
+
+
+\textbf{En øvre grænse egenskaben}
+\begin{lemma}
+  Lad $G = (V,E))$ være en orienteret graf med vægtsfunktion $w(u,v)$ på en kant $(u,v) \in G.E$. Lad $s$ være startknuden. Lad $s$ være startknuden. grafen bliver intitialiseret således at alle knuder $v \neq s \in G.V$ har $v.d = \infty$. Der gælder at $v.d \geq \delta(s,v)$, som invariant over alle relaxation operationer. Når $v.d$ får sin nedre grænse $\delta(s,v)$ forbliver den uændret. 
+\end{lemma}
+
+\begin{proof}
+\end{proof}
+
+
+\textbf{Ingen vej egenskaben}
+\begin{corollary}
+\end{corollary}
+
+\begin{proof}
+\end{proof}
+
+
+\textbf{Konvergens egenskaben}
+\begin{lemma}
+\end{lemma}
+
+\begin{proof}
+\end{proof}
+
+
+\textbf{Vej-relaxation egenskaben}
+\begin{lemma}
+\end{lemma}
+
+\begin{proof}
+\end{proof}
+
+
+\textbf{Forgænger delgraf egenskaben}
+\begin{lemma}
+\end{lemma}
+
+\begin{proof}
+\end{proof}
 
 %%% Local Variables:
 %%% mode: latex
