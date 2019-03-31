@@ -8,7 +8,7 @@
   \item Disjunkte mængder
   \item Køretid af Kruskals algoritme
   \end{itemize}
-\item Prim's algoritme
+\item Prims algoritme
   \begin{itemize}
     \item Prioritetskø
   \end{itemize}
@@ -57,15 +57,44 @@ For at finde en safe-edge skal vi finde en \textbf{light-edge}, som er en minimu
 Den første algoritme til at finde MST er Kruskals algoritme. Denne algoritme bruger en \textbf{skov} af træer, som er alle knuderne $G.V$. Derefter forbinder den de knuder som udgør en safe-edge.
 
 \subsubsection{Disjunkte mængder}
-For at forstå Kruskals algoritme, skal vi forstå disjunkte mængder.\\
-Linked-list repræsentation
-Operationer: Make-Set, Union, Find-Set
-Weighted-union heuristik: Bevis Theorem 21.1
-Disjoint-set skove: Union-by-rank, path compression
+Kruskals algoritme bruger disjunkte mængder til at holde kanterne i MST.\\
+
+Disjunkte mængder, er en datastruktur der understøtter følgende operationer og egenskaber.\\
+
+\begin{itemize}
+\item Hver mængde har et kanonisk element, kaldet mængdens repræsentant.
+\item \texttt{Make-Set($x$)} laver en ny mængde med $x$ som repræsentant.
+\item \texttt{Find-Set($x$)} returnerer repræsentanten for mængden der indeholder elementet $x$.
+\item \texttt{Union($x,y$)} Forbinder de to mængder med repræsentanter $x$ og $y$, således at den nye mængdes repræsentant er en af de to.
+\end{itemize}
+
+Der er to måder vi kan implementere disjunkte mængder på: Enten kan vi bruge en \textbf{linked-list}repræsentation, hvor hver mængde er en linked-list, med et mængde objekt, der peger på repræsentanten og hvor alle elementer peger på. Den anden metode, som vi bruger til Kruskal, er \textbf{Disjunkt-mængde skove}, som er en skov af disjunkte træer, hvor roden er repræsentanten af mængden.\\
+
+De tre operationer kan implementeres på følgende måde:
+\begin{itemize}
+\item \texttt{Make-Set($x$)}: Vi laver et nyt træ, kun indeholdende $x$, og vi sætter $x.\pi$ til at være sig selv, derved er den roden. Dette tager $Ø(1)$ tid.
+\item \texttt{Find-Set($x$)}: Vi følger $x = x.\pi$ op indtil $x = x.\pi$, hvorefter vi returnerer repræsentanten. Dette tager $Ø(h)$ tid.
+\item \texttt{Union($x,y$)}: Vi indsætter roden af det ene træ ind i det andet træ. Dette kan i værste fald føre til en hægtet-liste af elementer, derfor indføre vi to heuristikker: \textbf{Union by rank} og \textbf{path compression}. I union by rank holder hver knude et estimat af højden af dets deltræ, dets \textbf{rank}, og derfor kan vi forbinde det mindre træ på det større træ. Path compression indføres i \texttt{Find-Set($x$)}, hvor, så længe $x \neq x.\pi$ sætter vi $x.\pi = \texttt{Find-Set($x$)}$, dette minimerer højden af træet, og gør forældrestigen så kort som muligt.
+\end{itemize}
 
 \subsubsection{Køretid af Kruskals algoritme}
 Vi bruger \textbf{disjoint-set forets} til at udvikle MST med Kruskals.\\
+Første trin er at oprette en skov af mængder indeholdene alle knuderne i $G.V$, derefter sorteres alle kanterne efter stigende vægt. Derefter looper vi over alle kanterne $(u,v)$, og så længe $\texttt{Find-Set($u$)} \neq \texttt{Find-Set($v$)}$ så forbinder vi mængderne med \texttt{Union($u,v$)}. Til sidst returnerer vi den disjunkte mængde, som, hvis $G$ er forbundet, er et MST.\\
 
+Køretiden af Kruskals algoritme er $Ø(ElgV)$. Først laver vi $|V|$ disjunkte træer, som er $Ø(V)$, herefter looper vi over alle kanterne, og forbinder kantens knuder. Siden vi 
+
+
+\subsection{Prims algoritme}
+Prims algoritme fungerer meget som Dijkstras korteste vej algoritme. Her har vi en prioritetskø af $v.key$, som er en værdi der er den mindste vægt af en kant der forbinder til $v$. Vi initialiserer alle $v.key = \infty$ og $v.\pi$, derefter vælges en arbitrær knude $r$ til roden, og $r.key = 0$. Derefter lægges alle knuder ind i prioritetskøen $Q = G.V$. Vi udvælger knuden $u$ med den mindste $key$ i $Q$, som starter med at være $r$ og tjekker alle dens naboer $v$, og retter $v.key = w(u,v)$ hvis $w(u,v) < v.key$, og sætter $v.\pi = u$. Når køen er tom, betyder det at alle knuderne er i træet, og vi kan eventuelt returnerer rod-knuden.\\
+
+Algoritmen overholder følgende invarianter:
+\begin{enumerate}
+\item $A = \{(v,v.\pi) : v \in G.V - \{r\} - Q\}$
+\item Alle knuder i MST er knuder i $G.V - Q$
+\item For alle knuder $v \in G.V$, hvis $v.key < \infty$, så er $v.\pi \neq \texttt{NIL}$ og $(v, v.\pi)$ er en light-edge der forbinder $v$ til en knude der allerede er i MST.
+\end{enumerate}
+
+Køretiden af Prims algoritme er $Ø(E+VlgV)$ hvis vi implementerer vores prioritetskø med en Fibonacci hob, da \texttt{EXTRACT-MIN} tager $Ø(lgV)$, som udføres hvert loop $Ø(V)$ gange, og \texttt{DECREASE-KEY} operation tager $Ø(1)$ tid og udføres $Ø(E)$ gange. Dette giver $Ø(E+VlgV)$. 
 
 %%% Local Variables:
 %%% mode: latex

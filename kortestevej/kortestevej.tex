@@ -153,15 +153,6 @@ Vi bruger følgende egenskaber af en korteste vej:\\
     Base case er når $i=0$, så har vi at $v_0.d = s.d = 0 = \delta(s,s)$.
     Nu antager vi at $v_{i-1}.d = \delta(s, v_{v - 1})$, og vi kalder relax på kanten $(v_{i-1}, v_i)$. På grund af konvergens egenskaben, vil $v_i.d = \delta(s,v_i)$ efter relax kaldet.
   \end{proof}
-
-
-\item\textbf{Forgænger delgraf egenskaben}
-  \begin{lemma}
-  \end{lemma}
-
-  \begin{proof}
-  \end{proof}
-
 \end{itemize}
 
 \subsection{Bellman-Ford}
@@ -260,7 +251,8 @@ Algoritmen holder en invariant $Q = G.V-S$ ved begyndelsen af hver iteration.\\
 \end{proof}
 
 \subsubsection{Køretid}
-Vi kan opnå en køretid på $Ø(VlgV + E)$ ved at bruge en Fibonacci hob til at implementere min-prioritetskøen. Insert er theta(lgn) < theta(1), decrease-key er theta(lgn) < theta(1) extract-min theta(lgn) < O(lgn)
+Vi kan opnå en køretid på $Ø(VlgV + E)$ ved at bruge en Fibonacci hob til at implementere min-prioritetskøen. Vi laver $|V|$ inserts når vi initialiserer $Q=G.V$, hvilket er $\Theta(lgV)$. Vi laver $|V|$ \texttt{EXTRACT-MIN} som har en amortiseret køretid på $Ø(lgV)$, og så i hvert loop laver vi højst $|E|$ \texttt{DECREASE-KEY}, som har en amortiseret tid på $\Theta(1)$. Dette giver at vi har
+$$|V| \cdot Ø(lgV) + |E|\cdot \Theta(1) = Ø(VlgV + E)$$
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "master"

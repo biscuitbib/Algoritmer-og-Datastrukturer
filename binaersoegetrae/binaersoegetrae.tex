@@ -183,9 +183,10 @@ Right-rotate er den inverse af left-rotate.
 \subsubsection{Indsættelse}
 Vi kan indsætte i $Ø(lgn)$ tid, med en lille ændring i algoritmen. Ved kald af \texttt{INSERT($T,z$)} indsætter vi $z$ i vores træ som normalt og giver den en rød farve $z.color=red$. Derefter bruger vi en hjælpe funktion \texttt{RB-INSERT-FIXUP}, som sørger for at træet stadig overholder rød-sort egenskaberne efter indsættelse.\\
 
-
+Køretiden af en indsættelse er $Ø(lgn)$. Det tager $Ø(lgn)$ at vandre ned af træet for at finde den rigtige plads at indsætte, og derefter tager \texttt{RB-INSERT-FIXUP} $Ø(lgn)$ da den går fra bladet op til roden.
 
 \subsubsection{Sletning}
+Sletning tager også $Ø(lgn)$ tid. Her bruges også en hjælpefunktion \texttt{RB-DELETE-FIXUP}, til at vedligeholde rød-sort egenskaberne, som er $Ø(lgn)$.
 
 \subsection{Krydsende linjesegmenter}
 Hvis man har en mængde linjesegmenter og man ønsker at finde ud af om nogen af linjesegmenterne krydser hinanden kan man bruge en metode kaldet \textbf{sweeping}.\\
@@ -214,8 +215,8 @@ Algoritmen til at finde krydsende linjesegmenter bruger 4 hjælpefunktioner til 
 \begin{itemize}
 \item \texttt{INSERT($T,s$)} indsætter linjesegment $s$ i træet $T$
 \item \texttt{DELETE($T,s$)} fjerner linjesegment $s$ fra træet $T$
-\item \texttt{ABOVE($T,s$)} returnere linjesegmentet over $s$, således at $s' \succeq s$
-\item \texttt{BELOW($T,s$)} returnere linjesegmentet under $s$, således at $s \succeq s'$
+\item \texttt{ABOVE($T,s$)} returnere linjesegmentet over $s$, således at $s' \succeq s$. Svarer til \texttt{SUCCESSOR} i binær søgetræet.
+\item \texttt{BELOW($T,s$)} returnere linjesegmentet under $s$, således at $s \succeq s'$ Svarer til \texttt{PREDECESSOR} i binær søgetræet.
 \end{itemize}
 
 \begin{algorithm}[H]
@@ -243,6 +244,14 @@ Algoritmen til at finde krydsende linjesegmenter bruger 4 hjælpefunktioner til 
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
+
+Algoritmen bruger to datastrukturer: \textbf{sweep-line status} (\textbf{fejelinje}) holder relationer mellem punkterne som sweep-line har mødt. Til denne bruger vi et binært søgetræ, hvor binær søgetræs egenskaben er, at en knude (linjesegmen) $s_2$ er venstre barn af en forælder $s_1$, hvis $s_1 \succeq s_2$, og er højre barn hvis $s_2 \succeq s_1$. Derudover bruger vi også \textbf{event-point schedule} (\textbf{hændelseslisten}), som er et array af punkter sorteret efter stigende $x$-koordinat. Vi tilføjer et linjesegment til sweep-line status, når et punkt i event-point schedule er et venstre endepunkt, og fjerner linjesegmentet, når punktet er et højre endepunkt.\\
+
+Algoritmen looper over event-point schedule punkterne $p$, Hvis det punkt er et venstre endepunkt, tjekker vi punktets linjesegment $s$ \texttt{ABOVE} og \texttt{BELOW} om de krydser med $s$, hvis de gør, returnerer vi \texttt{TRUE}. Hvis $p$ er et højre endepunkt, tjekker vi om segmenterne \texttt{ABOVE} og \texttt{BELOW} om de krydser med hinanden, og returnerer \texttt{TRUE} hvis de gør. Til sidst returnerer vi \texttt{FALSE}, hvis ingen krydsende linjesegmenter blev fundet.\\
+
+\textbf{Køretiden} af algoritmen er $Ø(nlgn)$. Vi sorterer alle punkterne, hvilket kan gøres i $Ø(nlgn)$ med f.eks. merge-sort. Derefter looper vi over alle $2n$ punkter, hvor $n$ er antallet af linjesegmenter, og tiden inde i loopet er $O(lgn)$, siden vi bruger et rød-sort træ, til at implementerer sweep-line status. Selve algoritmen til at finde om to linjesegmenter krdyser, er $Ø(1)$, da den kan implementeres med simple krydsprodukt operationer. Derfor er køretiden for denne algoritme $Ø(nlgn)$.\\
+
+Der er $k$ krydsende linjesegmenter -- $k = Ø(n^2)$, da der er $(n \choose 2)$ par af linjesegmenter. Hvis algoritmen skulle returnerer alle linjesegmenterne, ville tiden være $Ø((n+k)lgn)$ da vi for hver omgang af loopet, som er $O(n)$, skal tjekke $O(k)$ krydsende linjesegmenter, hvis vi finder et kryds. Hvis vi ikke tjekkede for alle kryds, ville algoritmen kun returnerer det første andet linjesegment som $s$ krydsede med, og ikke dem alle. Hvis der viser sig at være $k = n^2$ kryds, er køretiden $Ø((n + n^2)lgn) = Ø(n^2lgn)$.
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "master"

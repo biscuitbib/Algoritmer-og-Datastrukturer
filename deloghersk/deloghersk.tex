@@ -1,46 +1,24 @@
 \section{Del og Hersk}
 \hrulefill
 \begin{itemize}
-\item De 3 trin
-  \begin{itemize}
-  \item Del
-  \item Hersk
-  \item Foren
-  \end{itemize}
 \item Merge-sort
   \begin{itemize}
-  \item Merge
-  \item Merge-sort
+  \item Rekursionsligningen
+  \item Rekurstionstræer
+  \item Substitutions metoden
+  \item Master metoden
   \end{itemize}
-\item Rekursionsligninger
-\item Rekurstionstræer
-\item Substitutions metoden
-  \begin{itemize}
-  \item Lav et gæt
-  \item Bevis gættet med matematisk induktion
-  \end{itemize}
-\item Master metoden
-  \begin{itemize}
-  \item De 3 tilfælde
-  \item Hvornår den ikke kan bruges
-  \end{itemize}
-\item Tætteste par af punkter
 \item Bevis for nedre grænse for sortering
+\item Tætteste par af punkter
 \end{itemize}
 
 \newpage
-\subsection{De 3 trin}
-Del og hersk er et algoritme paradigme, der løser problemer ved at følge 3 trin:\\
-\begin{itemize}
-\item \textbf{Del} problemet op i mindre underproblemer.
-\item \textbf{Hersk} - løs de mindre underproblemer.
-\item \textbf{Foren} de løste underproblemer til en løsning på de oprindelige problem
-\end{itemize}
+\subsection{Merge-sort}
+Del og hersk er et algoritme paradigme\\
 
-En del og hersk algoritme deler ofte problemet op rekursivt indtil den når et base case. 
+En del og hersk algoritme deler ofte problemet op rekursivt indtil den når et base case, hvorefter den løser delproblemerne.\\
 
-\subsubsection{Merge-sort}
-Merge-sort er en sorterings algoritmen der gør brug af del og hersk paradigmet for at sortere. Dens 3 trin er:
+Vi tager udgangspunkt i merge-sort, som er en sorterings algoritme der gør brug af del og hersk paradigmet for at sortere. Dens 3 trin er:
 \begin{itemize}
 \item Del et array op i midten så du har 2 arrays der skal sorteres.
 \item Bliv ved med at dele til hvert array består af 1 element. Voila! Dette array er nu trivielt sorteret.
@@ -99,10 +77,10 @@ Selve Merge-sort funktionen er meget simpel.
   \end{algorithmic}
 \end{algorithm}
 
-\subsection{Rekursionsligninger}
+\subsubsection{Rekursionsligningen}
 For at beskrive del og hersk algoritmers køretid, skal vi have en måde at beskrive rekursive funktioners køretid. Dette gøres med rekursionsligninger. Hvis vi kigger på merge-sorts køretid $T(n)$, så ser vi, at den splitter arrayet op i to stykker som den rekursivt kalder merge-sort på, det giver $T(n) = T(\lfloor \frac{n}{2} \rfloor) + T(\lceil \frac{n}{2} \rceil)$, det viser sig at vi kan fjerne floor og ceil funktionerne da de ikke ændre køretiden asymptotisk, så vi får $T(n) = 2T(\frac{n}{2})$. Vi skal også huske, at merge-sort kalder merge funktionen i hvert rekursive kald, hvilket lægger $cn$ til hvert rekursive kald, hvor $c$ beskriver de konstanter i merges køretid. Så den endelige rekursionsligning for merge-sort bliver
 $$T(n) = 2T(\frac{n}{2}) + cn$$
-\subsection{Rekursionstræer}
+\subsubsection{Rekursionstræer}
 I nogle tilfælde, når man skal beskrive rekursionligninger asymptotisk, kan det være meget nyttigt at tegne et rekursionstræ, der viser per-level-cost af hvert rekursionskald, og hvor dybt rekursionskaldene går. Rekursionstræet for merge-sort ses på figur 1.
 
 \begin{figure}[h!]
@@ -144,28 +122,35 @@ I nogle tilfælde, når man skal beskrive rekursionligninger asymptotisk, kan de
 %\end{center}
 \end{figure}
 
-For bestemme køretiden ud fra rekursionstræet summeres alle per-level-costs for rekursionslagene. Hver lags cost summeres til $cn$, hvilket er $\O(n)$, og fordi $n$ halveres hver gang er træet $\log_2(n)$ dybt. Køretiden er derfor $\O(n\log_2(n))$. For at være mere grundig i sin argumentation, kan man bruge substitutionsmetoden efter man har lavet sit rekursionstræ.
-\subsection{Substitutionsmetoden}
+For bestemme køretiden ud fra rekursionstræet summeres alle per-level-costs for rekursionslagene. Hver lags cost summeres til $cn$, hvilket er $\O(n)$, og fordi $n$ halveres hver gang er træet $\log_2(n)$ dybt +1 for det oprindelige kald. Køretiden er derfor $cnlgn + cn = \O(n\log_2(n))$. For at være mere grundig i sin argumentation, kan man bruge substitutionsmetoden efter man har lavet sit rekursionstræ.
+\subsubsection{Substitutionsmetoden}
 Substitutionsmetoden er en anden måde at analysere rekursionsligninger. Substitutionsmetoden består af to trin
 \begin{itemize}
 \item Lav et gæt $f(n)$. Lav evt. et rekursionstræ for at få en fornemmelse af rekursionsligningens køretid.
 \item Bevis at gættet er korrekt. Her bruges matematisk induktion til at vise at rekursionsligningen er $T(n) = \O(f(n))$, ved at antage $T(m) \leq cf(m), m < n$ og derefter vise $T(n) \leq cf(n)$.
 \end{itemize}
 
-I tilfældet med merge-sort, skal vi bevise at $T(n) = Ø(nlgn)$, som er vores gæt ud fra rekursionstræet:\\
+I tilfældet med merge-sort, skal vi bevise at $T(n) = Ø(nlgn)$, som er vores gæt ud fra rekursionstræet, ved at vise $T(n) \leq cnlgn + cn$, som er vores gæt fra rekursionstræet:\\
+
+Vi starter med base case. $T(1) = c$, da der ikke bliver lavet nogen rekursive kald. Det giver
+\begin{align*}
+  T(1) &= c \leq c1lg1 + c\\
+       &= c \leq c
+\end{align*}
+Vi antager nu at $T(m) \leq cmlgm$:\\
 
 \begin{proof}
-  Vi antager at $T(m) \leq cmlgm$:
   \begin{align*}
-    T(n) &= 2T(\frac{n}{2}) + n \leq cnlgn\\
-         &= 2(c\frac{n}{2}lg\frac{n}{2}) + n \leq cnlgn\\
-         &= 2(\frac{cnlg2}{2} - \frac{cn}{2}) + n \leq cnlgn\\
-         &= cnlgn - cn + n \leq cnlgn
+    T(n) &= 2T(\frac{n}{2}) + n \leq cnlgn + cn\\
+         &= 2(c\frac{n}{2}lg\frac{n}{2} + c\frac{n}{2}) + cn \leq cnlgn + cn\\
+         &= 2(\frac{cnlg2}{2} - \frac{cn}{2} + \frac{cn}{2}) + cn \leq cnlgn\\
+         &= cnlgn - cn + cn + cn \leq cnlgn
+         &= cnlgn + cn \leq cnlgn + cn
   \end{align*}
-  $cnlgn - cn + n \leq cnlgn$ gælder for alle $c \geq 1$
+  Ergo har vi at $T(n) = cnlgn + cn = Ø(nlgn)$.
 \end{proof}
 
-\subsection{Master metoden}
+\subsubsection{Master metoden}
 I Master metoden tager man udgangspunkt i rekursionsligninger med formen
 $$T(n) = aT(\frac{n}{b}) + f(n)$$
 
@@ -186,6 +171,33 @@ Hvis vi bruger master metoden på merge-sort, ser vi at vi har $a = 2, b=2, f(n)
 $$n = \Theta(n^{\log_2(2)}) \Rightarrow f(n) = n = \Theta(nlgn)$$
 
 master method virker kun i de tilfælde hvor $f(n)$ enten er polynomisk større, i 1. tilfælde, og polynomisk mindre, i 3. tilfælde, end $n^{\log_b(a)}$. Det er grunden til at vi inkluderer en konstant $\epsilon > 0$
+
+\subsection{Bevis for nedre grænse for sortering}
+Vi har brugt merge-sort som har en køretid på $Ø(nlgn)$, som vores eksempel, og det kan vises at den køretid er så god som det kan blive for sammenligningssorteringer.\\
+
+Vi tager udgangspunkt i et \textbf{decision-tree}, hvor en knude repræsenter en sammenligning mellem to elementer $i:j$ i listen der skal sorteres. Hvis man går til venstre bytter man hvis $i \leq j$, og til højre bytter man når $i < j$.
+\begin{theorem}
+  Enhver sammenligningssorteringsalgoritme er $\Omega(nlgn)$.
+\end{theorem}
+
+\begin{proof}
+  Der er $n!$ permutationer af listen og alle knuderne repræsenterer en forskellig permutation. En sortering svarer derfor til at tage nogle beslutninger i vores decision-tree indtil man ender i den permutation der er den sorterede, og vi skal derfor finde højden $h$ for at finde hvor mange trin algoritmen skal tage.\\
+
+  Vi ved vi har med et fuldt binært træ, derfor er der højst $2^h$ blade, og vi har altså
+  $$n! \leq 2^h$$
+
+  Og vi finder højden ved at tage logaritmen
+  $$lg(n!) \leq h$$
+
+  $n! = \Theta(n^n)$ og vi har derfor
+
+  $$nlgn \leq h$$
+
+  Ergo er $h = \Omega(nlgn)$.
+\end{proof}
+
+
+
 \subsection{Tætteste par af punkter}
 Et andet problem der løses med del og hersk, er problemet med at finde det tætteste par af punkter. Givet en mængde punkter $Q$ med $n > \geq 2$ punkter skal vi finde to punkter $p_1 = (x_1, y_1)$ og $p_2 = (x_2, y_2)$ der har den mindste Euklidiske afstand $d(p_1, p_2) = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$. Den naive måde at løse problemet på, er ved at se på alle $(n \choose 2) = \Theta(n^2)$ punkter, og returnerer dem med lavest afstand.\\
 
@@ -213,29 +225,6 @@ Det er let at se hvordan den vælger $\delta$, så det vi skal vise for at vise 
 
 For at opnå en køretid på $Ø(nlgn)$ \textbf{præsorterer} vi $X$, og $Y$, før det første rekursive kald, og i hvert rekursive kald, splitter vi dem i en \emph{omvendt} \texttt{MERGE}, der splitter dem i $X_L, X_R$ og $Y_L, Y_R$ således, at de splittede arrays stadig er sorterede, hvilket tager $Ø(n)$ tid. Da vi laver rekursive kald på $|P_L| = \lfloor \frac{|P|}{2}\rfloor$ og $|P_R| = \lceil \frac{|P|}{2}\rceil$, er det let at se rekursionsligningen $T(n) = 2T(\frac{n}{2}) + Ø(n) = Ø(nlgn)$.
 
-\subsection{Bevis for nedre grænse for sortering}
-Vi har brugt merge-sort som har en køretid på $Ø(nlgn)$, som vores eksempel, og det kan vises at den køretid er så god som det kan blive for sammenligningssorteringer.\\
-
-Vi tager udgangspunkt i et \textbf{decision-tree}, hvor en knude repræsenter en sammenligning mellem to elementer $i:j$ i listen der skal sorteres. Hvis man går til venstre bytter man hvis $i \leq j$, og til højre bytter man når $i < j$.
-\begin{theorem}
-  Enhver sammenligningssorteringsalgoritme er $\Omega(nlgn)$.
-\end{theorem}
-
-\begin{proof}
-  Der er $n!$ permutationer af listen og alle knuderne repræsenterer en forskellig permutation. En sortering svarer derfor til at tage nogle beslutninger i vores decision-tree indtil man ender i den permutation der er den sorterede, og vi skal derfor finde højden $h$ for at finde hvor mange trin algoritmen skal tage.\\
-
-  Vi ved vi har med et fuldt binært træ, derfor er der højst $2^h$ blade, og vi har altså
-  $$n! \leq 2^h$$
-
-  Og vi finder højden ved at tage logaritmen
-  $$lg(n!) \leq h$$
-
-  $n! = \Theta(n^n)$ og vi har derfor
-
-  $$nlgn \leq h$$
-
-  Ergo er $h = \Omega(nlgn)$.
-\end{proof}
 
 %%% Local Variables:
 %%% mode: latex
