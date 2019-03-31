@@ -3,6 +3,7 @@
 *.out
 *.toc
 *.pdf
+!master.pdf
 *.el
 auto/
 */auto/
